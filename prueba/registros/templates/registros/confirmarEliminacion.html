@@ -1,0 +1,26 @@
+{% extends "inicio/encabezado.html" %}
+{% block titulo %} ELIMINAR {% endblock %}
+{% block imagen %}
+{% load static %}
+{% endblock %}
+{% block encabezado %}
+{% endblock %}
+
+<div class="page-header">
+    <div class="page-title">
+        <h3>ELIMINAR COMENTARIO</h3>
+    </div>
+</div>
+
+{% block contenido %}
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="callout callout-danger fade in">
+        <h5>Eliminando Comentarios</h5>
+        <p>¿Estás seguro de que deseas <strong>Eliminar</strong> el comentario seleccionado?</p>
+    </div>
+    <button type="submit" class="btn btn-danger">Sí</button>
+    <a href="{% url 'ConsultarComentario' %}" class="btn btn-primary">Cancelar</a>
+</form>
+{% endblock %}

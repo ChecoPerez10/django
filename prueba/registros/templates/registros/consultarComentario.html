@@ -1,0 +1,46 @@
+{% extends "inicio/encabezado.html" %}
+
+{% block titulo %} Lista de Comentarios {% endblock %}
+
+{% block encabezado %}
+<h3>Comentarios
+    <small>Lista de Comentarios</small>
+</h3>
+{% endblock %}
+
+{% block contenido %}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Mensaje</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for comentario in comentarios %}
+        <tr>
+            <td>{{ comentario.usuario }}</td>
+            <td>{{ comentario.mensaje }}</td>
+            <td>
+
+                <a href="{% url 'ConsultaIndividual' comentario.id %}" 
+                   class="btn btn-warning btn-sm">
+                    Editar
+                </a>
+
+                <a href="{% url 'Eliminar' comentario.id %}" 
+                   class="btn btn-danger btn-sm">
+                    Eliminar
+                </a>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+{% endblock %}
