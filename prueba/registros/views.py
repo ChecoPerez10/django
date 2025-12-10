@@ -5,6 +5,10 @@ from django.db.models import Q
 from .models import Alumnos, ComentarioContacto
 from .forms import ComentarioContactoForm
 import datetime
+from .models import Archivos
+from .forms import FormArchivos
+from django.contrib import messages
+
 
 def registros(request):
     alumnos = Alumnos.objects.all()
@@ -73,79 +77,77 @@ def consultarComentarioIndividual(request, id):
         'form': ComentarioContactoForm(instance=comentario)
     })
 
-def consultar1(request):
-    alumnos = Alumnos.objects.filter(carrera="TI")
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
+def consulta1(request):
+    alumnos=Alumnos.objects.filter(carrera="TI")
+    return render(request,"registros/consultas.html",{'alumnos':alumnos})
+
+def consulta2(request):
+    alumnos=Alumnos.objects.filter(carrera="TI").filter(turno="Matutino")
+    return render(request,"registros/consultas.html",{'alumnos':alumnos})
+
+def consulta3(request):
+    alumnos=Alumnos.objects.all().only("matricula","nombre","carrera","turno","imagen")
+    return render(request,"registros/consultas.html",{'alumnos':alumnos})
+
+def consulta4(request):
+    alumnos=Alumnos.objects.filter(turno__contains="Vesp")
+    return render(request,"registros/consultas.html",{'alumnos':alumnos})
+
+def consulta5(request):
+    alumnos=Alumnos.objects.filter(nombre__in=["Juan", "Ana"])
+    return render(request,"registros/consultas.html",{'alumnos':alumnos})
+
+def consulta6(request):
+    fechaInicio=datetime.date(2025,11,24)
+    fechaFin=datetime.date(2025,11,27)
+    alumnos=Alumnos.objects.filter(created__range=(fechaInicio,fechaFin))
+    return render(request,"registros/consultas.html",{'alumnos':alumnos})
+
+def consulta7(request):
+    alumnos=Alumnos.objects.filter(comentario__coment__contains='No inscrito')
+    return render(request,"registros/consultas.html",{'alumnos':alumnos})
+
+def consulta8(request):
+    inicio=datetime.date(2025,11,20)
+    fin=datetime.date(2025,11,26)
+    comentario=ComentarioContacto.objects.filter(created__range=(inicio,fin))
+    return render(request,"registros/comentario.html",{'comentarios':comentario})
+
+def consulta9(request, nombre):
+    comentarios = ComentarioContacto.objects.filter(alumno__nombre__iexact=nombre)
+    return render(request, "comentario/comentarios.html", {"comentarios": comentarios})
+
+def consulta10(request):
+    comentario=ComentarioContacto.objects.filter(mensaje__endswith ="o")
+    return render(request,"registros/comentario.html",{'comentarios':comentario})
 
 
-def consultar2(request):
-    alumnos = Alumnos.objects.filter(carrera="TI", turno="Matutino")
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
+def consulta11(request):
+    comentario=ComentarioContacto.objects.all().only("mensaje")
+    return render(request,"registros/comentario.html",{'comentarios':comentario})
 
+def consulta12(request):
+    comentario=ComentarioContacto.objects.filter(mensaje__startswith="T")
+    return render(request, "registros/comentario.html",{'comentarios':comentario})
 
-def consultar3(request):
-    alumnos = Alumnos.objects.only("matricula", "nombre", "carrera", "turno")
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar4(request):
-    alumnos = Alumnos.objects.filter(turno__icontains="Vesp")
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar5(request):
-    alumnos = Alumnos.objects.filter(nombre__in=["Juan", "Ana"])
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar6(request):
-    fechaInicio = datetime.date(2025, 10, 28)
-    fechaFin = datetime.date(2025, 10, 28)
-    alumnos = Alumnos.objects.filter(created__date__range=(fechaInicio, fechaFin))
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar7(request):
-    alumnos = Alumnos.objects.filter(comentario__coment__icontains="No inscrito").distinct()
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar8(request):
-    alumnos = Alumnos.objects.filter(nombre__startswith="A")
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar9(request):
-    alumnos = Alumnos.objects.filter(
-        Q(turno="Matutino") | Q(turno="Vespertino")
-    )
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar10(request):
-    alumnos = Alumnos.objects.exclude(carrera="TI")
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar11(request):
-    alumnos = Alumnos.objects.all().order_by("nombre")
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-def consultar12(request):
-    fechaInicio = datetime.date(2024, 1, 1)
-    fechaFin = datetime.date(2024, 12, 31)
-    alumnos = Alumnos.objects.filter(created__date__range=(fechaInicio, fechaFin))
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
+def archivos(request):
+    if request.method == 'POST':
+        form = FormArchivos(request.POST, request.FILES)
+        if form.is_valid():
+            titulo = request.POST['titulo']
+            descripcion = request.POST['descripcion']
+            archivo = request.FILES['archivo']
+            insert = Archivos(titulo=titulo, descripcion=descripcion,
+            archivo=archivo)
+            insert.save()
+            return render(request,"registros/archivos.html")
+        else:
+            messages.error(request, "Error al procesar el formulario")
+    else:
+        return render(request,"registros/archivos.html",{'archivo':Archivos})
 
 def consultasSQL(request):
-    alumnos = Alumnos.objects.raw(
-        'SELECT id, matricula, nombre, carrera, turno, imagen '
-        'FROM registros_alumnos '
-        'WHERE carrera = "TI" '
-        'ORDER BY turno DESC')
-    return render(request, "registros/consultas.html", {'alumnos': alumnos})
-
-
-
+    alumnos=Alumnos.objects.raw('SELECT id,matricula,nombre, carrera, turno, imagen FROM registros_alumnos WHERE carrera="TI" ORDER BY turno DESC')
+    return render(request,"registros/consultas.html",{'alumnos':alumnos})
+#baby vamo a hacerlo como antes 
 
