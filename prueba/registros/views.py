@@ -1,81 +1,59 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, HttpResponseForbidden
-from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models import Q
-from .models import Alumnos, ComentarioContacto
+from django.shortcuts import render
+from .models import Alumnos
 from .forms import ComentarioContactoForm
+from .models import ComentarioContacto
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 import datetime
 from .models import Archivos
 from .forms import FormArchivos
 from django.contrib import messages
 
-
+# Create your views here.
 def registros(request):
-    alumnos = Alumnos.objects.all()
-    return render(request, "registros/principal.html", {'alumnos': alumnos})
-
+    alumnos=Alumnos.objects.all()
+    #all recupera todos los objetos del modelo (registros de la tabla de alumnos)
+    return render(request,"registros/principal.html",{'alumnos':alumnos})
+#indicamos el lugar donde se renderizara el dresultado de esta vista
 
 def registrar(request):
     if request.method == 'POST':
         form = ComentarioContactoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return render(request, 'registros/contacto.html')
-    form = ComentarioContactoForm()
-    return render(request, 'registros/contacto.html', {'form': form})
-
+        if form.is_valid():#Si los datos recibidos son correctos
+            form.save()#inserta
+            return redirect('Comentario')
+    form= ComentarioContactoForm()
+    #Si algo sale mal se reenvian al formulario los datos ingresados
+    return render(request,'registros/contacto.html',{'form':form})
 
 def contacto(request):
-    return render(request, "registros/contacto.html")
+    return render(request,"registros/contacto.html")
 
 
-def consultarComentario(request):
+def comentario(request):
     comentarios = ComentarioContacto.objects.all()
-    return render(request, "registros/consultarComentario.html", {
-        'comentarios': comentarios
-    })
+    return render(request, "registros/comentario.html", {'comentarios': comentarios})
 
-
-@permission_required('registros.delete_comentariocontacto', raise_exception=True)
-def eliminarComentarioContacto(request, id, confirmacion='registros/confirmarEliminacion.html'):
+def eliminarComentarioContacto(request, id, 
+    confirmacion='registros/confimarEliminacion.html'):
     comentario = get_object_or_404(ComentarioContacto, id=id)
     if request.method == 'POST':
         comentario.delete()
         comentarios = ComentarioContacto.objects.all()
-        return render(request, "registros/consultarComentario.html", {
-            'comentarios': comentarios
-        })
-    return render(request, confirmacion, {
-        'object': comentario
-    })
+        return render(request, "registros/comentario.html", {'comentarios': comentarios})
 
+    return render(request, confirmacion, {'object': comentario})
 
-@permission_required('registros.change_comentariocontacto', raise_exception=True)
-def editarComentarioContacto(request, id):
+def editarComentario(request, id):
     comentario = get_object_or_404(ComentarioContacto, id=id)
 
     if request.method == 'POST':
-        form = ComentarioContactoForm(request.POST, instance=comentario)
-        if form.is_valid():
-            form.save()
-            comentarios = ComentarioContacto.objects.all()
-            return render(request, "registros/consultarComentario.html", {
-                'comentarios': comentarios
-            })
+        comentario.usuario = request.POST.get('usuario')
+        comentario.mensaje = request.POST.get('mensaje')
+        comentario.save()
+        return redirect('Comentario')
 
-    form = ComentarioContactoForm(instance=comentario)
-    return render(request, "registros/formEditarComentario.html", {
-        'comentario': comentario,
-        'form': form
-    })
-
-
-def consultarComentarioIndividual(request, id):
-    comentario = get_object_or_404(ComentarioContacto, id=id)
-    return render(request, "registros/formEditarComentario.html", {
-        'comentario': comentario,
-        'form': ComentarioContactoForm(instance=comentario)
-    })
+    return render(request, 'registros/editarComentario.html', {'comentario': comentario})
 
 def consulta1(request):
     alumnos=Alumnos.objects.filter(carrera="TI")
@@ -149,5 +127,3 @@ def archivos(request):
 def consultasSQL(request):
     alumnos=Alumnos.objects.raw('SELECT id,matricula,nombre, carrera, turno, imagen FROM registros_alumnos WHERE carrera="TI" ORDER BY turno DESC')
     return render(request,"registros/consultas.html",{'alumnos':alumnos})
-#baby vamo a hacerlo como antes 
-

@@ -7,8 +7,8 @@ def contacto(request):
 def formulario(request):
     return render(request, "inicio/formulario.html")
 
+def principal(request):
+    return render(request, "inicio/principal.html")
+
 def ejemplo(request):
     return render(request, "inicio/ejemplo.html")
-
-def registros (request):
-    return render(request), "registros/principal.html"

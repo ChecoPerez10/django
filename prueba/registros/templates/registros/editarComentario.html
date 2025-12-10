@@ -1,0 +1,51 @@
+{% extends "inicio/encabezado.html" %}
+
+{% block titulo %} EDITAR {% endblock %}
+
+{% block imagen %}
+    {% load static %}
+    {%static 'inicio/images/contacto.png'%}
+{% endblock %}
+
+{% block info %}
+    Editar <span>comentario</span>
+{% endblock %}
+
+{% block encabezado %}
+    <h3>EDITAR COMENTARIO</h3>
+{% endblock %}
+
+{% block contenido %}
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="callout callout-info fade in" style="margin-bottom:20px;">
+        <h5>Modificar Comentario</h5>
+
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Nombre del usuario</label>
+        <input 
+            type="text" 
+            name="usuario" 
+            value="{{ comentario.usuario }}" 
+            class="form-control"
+        >
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Contenido del mensaje</label>
+        <textarea 
+            name="mensaje" 
+            rows="4"
+            class="form-control"
+        >{{ comentario.mensaje }}</textarea>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-success">Guardar cambios</button>
+    <a href="{% url 'Comentario' %}" class="btn btn-primary">Cancelar</a>
+</form>
+
+{% endblock %}

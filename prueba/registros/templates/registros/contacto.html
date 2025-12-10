@@ -15,10 +15,11 @@
 			<!-- /Encabezado-->
 			 {%endblock%}
 {% block contenido%}
+			
 
 			<!-- Formulario -->
-			<form class="form-horizontal" action="{% url 'Registrar'%}" method="POST" role="form">
-{% csrf_token %}
+			<form class="form-horizontal" action="{% url 'Registrar' %}" method="POST" role="form">
+				{% csrf_token %}
 	            <div class="panel panel-default">
 	                <div class="panel-body">
 
